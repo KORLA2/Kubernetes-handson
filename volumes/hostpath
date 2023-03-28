@@ -3,6 +3,7 @@
 # Important thing here is that whatever we create in container one boo folder will be reflected in node's /var/log path and container two bo path.
 
 # This is because both containers are sharing same volume
+# lifetime of volume is the life time of pod which means if pod dies volume mounted also vanishes.
 
 apiVersion: apps/v1
 kind: Deployment
