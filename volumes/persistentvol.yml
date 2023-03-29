@@ -1,0 +1,73 @@
+# 
+
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mypv
+spec:
+  capacity:
+    storage: 10Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: manual
+ 
+  hostPath:
+      path:  /data
+
+
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cache
+spec:
+  resources:
+    requests:
+      storage: 10Mi
+
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  selector:
+    matchLabels:
+       app: myapp
+
+  template:
+    metadata:
+      labels:
+        app: myapp
+
+    spec:
+      volumes:
+      - name:  data
+        persistentVolumeClaim:
+          claimName: cache
+      containers:
+      - name: one
+        image: nginx  
+        command:
+         - "bin/sh"
+        args:
+         - "-c"
+         - "touch /boo/bar.txt && echo Hello > /boo/bar.txt && sleep  3600"  
+        volumeMounts:
+          - name:  data
+            mountPath:  /boo
+
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
